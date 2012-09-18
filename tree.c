@@ -721,16 +721,19 @@ static const char *tree_artist_name(const struct track_info* ti)
 	const char *val = ti->artist;
 
 	if (!prefer_artist) {
-		val = ti->albumartist;
-
 		if (ti->is_va_compilation)
 			val = "<Various Artists>";
-	}
-
-	if (!val || strcmp(val, "") == 0) {
-		val = ti->albumartist;
-		if (!val || strcmp(val, "") == 0)
-			val = "<No Name>";
+		else {
+			val = ti->albumartist;
+			if (!val || strcmp(val, "") == 0)
+				val = "<No Name>";
+		}
+	} else {
+		if (!val || strcmp(val, "") == 0) {
+			val = ti->albumartist;
+			if (!val || strcmp(val, "") == 0)
+				val = "<No Name>";
+		}
 	}
 
 	return val;

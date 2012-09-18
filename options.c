@@ -672,13 +672,11 @@ static void get_prefer_artist(unsigned int id, char *buf)
 static void set_prefer_artist(unsigned int id, const char *buf)
 {
 	parse_bool(buf, &prefer_artist);
-	lib_tree_win->changed = 1;
 }
 
 static void toggle_prefer_artist(unsigned int id)
 {
 	prefer_artist ^= 1;
-	lib_tree_win->changed = 1;
 }
 
 const char * const aaa_mode_names[] = {
