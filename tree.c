@@ -718,12 +718,20 @@ static void album_add_track(struct album *album, struct tree_track *track)
 
 static const char *tree_artist_name(const struct track_info* ti)
 {
-	const char *val = ti->albumartist;
+	const char *val = ti->artist;
 
-	if (ti->is_va_compilation)
-		val = "<Various Artists>";
-	if (!val || strcmp(val, "") == 0)
-		val = "<No Name>";
+	if (!prefer_artist) {
+		val = ti->albumartist;
+
+		if (ti->is_va_compilation)
+			val = "<Various Artists>";
+	}
+
+	if (!val || strcmp(val, "") == 0) {
+		val = ti->albumartist;
+		if (!val || strcmp(val, "") == 0)
+			val = "<No Name>";
+	}
 
 	return val;
 }

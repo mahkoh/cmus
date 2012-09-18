@@ -73,6 +73,7 @@ int shuffle = 0;
 int display_artist_sort_name;
 int smart_artist_sort = 1;
 int scroll_offset = 0;
+int prefer_artist = 0;
 
 int colors[NR_COLORS] = {
 	-1,
@@ -663,6 +664,23 @@ static void toggle_display_artist_sort_name(unsigned int id)
 	lib_tree_win->changed = 1;
 }
 
+static void get_prefer_artist(unsigned int id, char *buf)
+{
+	strcpy(buf, bool_names[prefer_artist]);
+}
+
+static void set_prefer_artist(unsigned int id, const char *buf)
+{
+	parse_bool(buf, &prefer_artist);
+	lib_tree_win->changed = 1;
+}
+
+static void toggle_prefer_artist(unsigned int id)
+{
+	prefer_artist ^= 1;
+	lib_tree_win->changed = 1;
+}
+
 const char * const aaa_mode_names[] = {
 	"all", "artist", "album", NULL
 };
@@ -1090,6 +1108,7 @@ static const struct {
 	DT(play_library)
 	DT(play_sorted)
 	DT(display_artist_sort_name)
+	DT(prefer_artist)
 	DT(repeat)
 	DT(repeat_current)
 	DT(replaygain)
