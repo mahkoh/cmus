@@ -134,6 +134,7 @@ extern int display_artist_sort_name;
 extern int prefer_artist;
 extern int smart_artist_sort;
 extern int scroll_offset;
+extern int skip_track_info;
 
 extern const char * const aaa_mode_names[];
 extern const char * const view_names[NR_VIEWS + 1];

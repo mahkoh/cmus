@@ -72,7 +72,8 @@ int repeat = 0;
 int shuffle = 0;
 int display_artist_sort_name;
 int smart_artist_sort = 1;
-int scroll_offset = 0;
+int scroll_offset = 2;
+int skip_track_info = 0;
 int prefer_artist = 0;
 
 int colors[NR_COLORS] = {
@@ -917,6 +918,21 @@ static void toggle_wrap_search(unsigned int id)
 	wrap_search ^= 1;
 }
 
+static void get_skip_track_info(unsigned int id, char *buf)
+{
+	strcpy(buf, bool_names[skip_track_info]);
+}
+
+static void set_skip_track_info(unsigned int id, const char *buf)
+{
+	parse_bool(buf, &skip_track_info);
+}
+
+static void toggle_skip_track_info(unsigned int id)
+{
+	skip_track_info ^= 1;
+}
+
 
 /* }}} */
 
@@ -996,7 +1012,7 @@ static void set_attr(unsigned int id, const char *buf)
 
 	do {
 		if (buf[i] == '|' || buf[i] == '\0') {
-			current = strndup(&buf[offset], length);
+			current = xstrndup(&buf[offset], length);
 
 			if (strcmp(current, "default") == 0)
 				attr |= A_NORMAL;
@@ -1122,6 +1138,7 @@ static const struct {
 	DN(softvol_state)
 	DN_FLAGS(status_display_program, OPT_PROGRAM_PATH)
 	DT(wrap_search)
+	DT(skip_track_info)
 	{ NULL, NULL, NULL, NULL, 0 }
 };
 
@@ -1305,14 +1322,15 @@ void options_exit(void)
 {
 	struct cmus_opt *opt;
 	struct filter_entry *filt;
+	char filename_tmp[512];
 	char filename[512];
 	FILE *f;
 	int i;
 
-	snprintf(filename, sizeof(filename), "%s/autosave", cmus_config_dir);
-	f = fopen(filename, "w");
+	snprintf(filename_tmp, sizeof(filename_tmp), "%s/autosave.tmp", cmus_config_dir);
+	f = fopen(filename_tmp, "w");
 	if (f == NULL) {
-		warn_errno("creating %s", filename);
+		warn_errno("creating %s", filename_tmp);
 		return;
 	}
 
@@ -1352,6 +1370,11 @@ void options_exit(void)
 	fprintf(f, "\n");
 
 	fclose(f);
+
+	snprintf(filename, sizeof(filename), "%s/autosave", cmus_config_dir);
+	i = rename(filename_tmp, filename);
+	if (i)
+		warn_errno("renaming %s to %s", filename_tmp, filename);
 }
 
 struct resume {
@@ -1416,7 +1439,7 @@ void resume_load(void)
 		set_view(resume.view);
 	if (resume.lib_filename) {
 		cache_lock();
-		ti = old = cache_get_ti(resume.lib_filename);
+		ti = old = cache_get_ti(resume.lib_filename, 0);
 		cache_unlock();
 		if (ti) {
 			editable_lock();
@@ -1437,7 +1460,7 @@ void resume_load(void)
 	}
 	if (resume.filename) {
 		cache_lock();
-		ti = cache_get_ti(resume.filename);
+		ti = cache_get_ti(resume.filename, 0);
 		cache_unlock();
 		if (ti) {
 			player_set_file(ti);
@@ -1460,14 +1483,16 @@ void resume_load(void)
 
 void resume_exit(void)
 {
+	char filename_tmp[512];
 	char filename[512];
 	struct track_info *ti;
 	FILE *f;
+	int rc;
 
-	snprintf(filename, sizeof(filename), "%s/resume", cmus_config_dir);
-	f = fopen(filename, "w");
+	snprintf(filename_tmp, sizeof(filename_tmp), "%s/resume.tmp", cmus_config_dir);
+	f = fopen(filename_tmp, "w");
 	if (!f) {
-		warn_errno("creating %s", filename);
+		warn_errno("creating %s", filename_tmp);
 		return;
 	}
 
@@ -1491,4 +1516,9 @@ void resume_exit(void)
 	fprintf(f, "browser-dir %s\n", escape(browser_dir));
 
 	fclose(f);
+
+	snprintf(filename, sizeof(filename), "%s/resume", cmus_config_dir);
+	rc = rename(filename_tmp, filename);
+	if (rc)
+		warn_errno("renaming %s to %s", filename_tmp, filename);
 }

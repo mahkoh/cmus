@@ -951,7 +951,7 @@ replaygain_preamp (6.0)
 resume (false)
 	Resume playback on startup.
 
-scroll_offset (0) [0-9999]
+scroll_offset (2) [0-9999]
 	Minimal number of screen lines to keep above and below the cursor.
 
 show_hidden (false)
@@ -966,6 +966,11 @@ show_remaining_time (false)
 shuffle (false)
 	Play in shuffled order.  Shuffle works in the library views (1-2) and
 	playlist view (3).
+
+skip_track_info (false)
+	Don't load metadata when adding tracks. Useful when using network file system
+	and having huge amount of files.
+	Tags can be loaded using 'update-cache' or 'win-update-cache' commands.
 
 softvol (false)
 	Use software volume control.
