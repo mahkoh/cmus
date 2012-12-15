@@ -64,6 +64,7 @@ int confirm_run = 1;
 int resume_cmus = 0;
 int show_hidden = 0;
 int show_current_bitrate = 0;
+int show_playback_position = 1;
 int show_remaining_time = 0;
 int set_term_title = 1;
 int wrap_search = 1;
@@ -75,6 +76,7 @@ int smart_artist_sort = 1;
 int scroll_offset = 2;
 int skip_track_info = 0;
 int prefer_artist = 0;
+int auto_expand_albums = 1;
 
 int colors[NR_COLORS] = {
 	-1,
@@ -806,6 +808,24 @@ static void toggle_show_hidden(unsigned int id)
 	browser_reload();
 }
 
+static void get_auto_expand_albums(unsigned int id, char *buf)
+{
+	strcpy(buf, bool_names[auto_expand_albums]);
+}
+
+static void set_auto_expand_albums(unsigned int id, const char *buf)
+{
+	if (!parse_bool(buf, &auto_expand_albums))
+		return;
+	browser_reload();
+}
+
+static void toggle_auto_expand_albums(unsigned int id)
+{
+	auto_expand_albums ^= 1;
+	browser_reload();
+}
+
 static void get_show_current_bitrate(unsigned int id, char *buf)
 {
 	strcpy(buf, bool_names[show_current_bitrate]);
@@ -820,6 +840,24 @@ static void set_show_current_bitrate(unsigned int id, const char *buf)
 static void toggle_show_current_bitrate(unsigned int id)
 {
 	show_current_bitrate ^= 1;
+	update_statusline();
+}
+
+static void get_show_playback_position(unsigned int id, char *buf)
+{
+	strcpy(buf, bool_names[show_playback_position]);
+}
+
+static void set_show_playback_position(unsigned int id, const char *buf)
+{
+	if (!parse_bool(buf, &show_playback_position))
+		return;
+	update_statusline();
+}
+
+static void toggle_show_playback_position(unsigned int id)
+{
+	show_playback_position ^= 1;
 	update_statusline();
 }
 
@@ -1130,7 +1168,9 @@ static const struct {
 	DN(replaygain_preamp)
 	DT(resume)
 	DT(show_hidden)
+	DT(auto_expand_albums)
 	DT(show_current_bitrate)
+	DT(show_playback_position)
 	DT(show_remaining_time)
 	DT(set_term_title)
 	DT(shuffle)
