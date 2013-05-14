@@ -929,6 +929,9 @@ play_sorted (false)
 	Play tracks from the library in the sorted view (2) order instead of
 	tree view (1) order.  Used only when play_library is true.
 
+prefer_artist (false)
+	Arrange the library by the "artist" tag instead of "albumartist".
+
 repeat (false)
 	Repeat after all tracks played.
 

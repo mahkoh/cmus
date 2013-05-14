@@ -76,6 +76,7 @@ int smart_artist_sort = 1;
 int scroll_offset = 2;
 int rewind_offset = 5;
 int skip_track_info = 0;
+int prefer_artist = 0;
 int auto_expand_albums = 1;
 
 int colors[NR_COLORS] = {
@@ -700,6 +701,21 @@ static void toggle_display_artist_sort_name(unsigned int id)
 	lib_tree_win->changed = 1;
 }
 
+static void get_prefer_artist(unsigned int id, char *buf)
+{
+	strcpy(buf, bool_names[prefer_artist]);
+}
+
+static void set_prefer_artist(unsigned int id, const char *buf)
+{
+	parse_bool(buf, &prefer_artist);
+}
+
+static void toggle_prefer_artist(unsigned int id)
+{
+	prefer_artist ^= 1;
+}
+
 const char * const aaa_mode_names[] = {
 	"all", "artist", "album", NULL
 };
@@ -1179,6 +1195,7 @@ static const struct {
 	DT(play_library)
 	DT(play_sorted)
 	DT(display_artist_sort_name)
+	DT(prefer_artist)
 	DT(repeat)
 	DT(repeat_current)
 	DT(replaygain)
