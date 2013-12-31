@@ -27,12 +27,12 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <stdio.h>
 #include <time.h>
 #include <stdint.h>
 #ifdef HAVE_BYTESWAP_H
@@ -262,6 +262,25 @@ static inline void enable_stdio(void)
 	while (dup2(_saved_stderr, 2) == -1 && errno == EINTR) { }
 	close(_saved_stdout);
 	close(_saved_stderr);
+}
+
+static inline FILE *new_memstream(void)
+{
+	return tmpfile();
+}
+
+static inline char *close_memstream(FILE *stream, size_t *size)
+{
+	fseek(stream, 0, SEEK_END);
+	size_t length = ftell(stream);
+	char *buf = malloc(length + 1);
+	buf[length] = 0;
+	rewind(stream);
+	fread(buf, length, 1, stream);
+	fclose(stream);
+	if (size)
+		*size = length;
+	return buf;
 }
 
 #endif

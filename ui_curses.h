@@ -23,6 +23,8 @@
 #include "compiler.h"
 #include "format_print.h"
 
+#include <stdio.h>
+
 enum ui_input_mode {
 	NORMAL_MODE,
 	COMMAND_MODE,
