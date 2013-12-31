@@ -20,6 +20,7 @@
 #define _SERVER_H
 
 #include "list.h"
+#include <stdio.h>
 
 struct client {
 	struct list_head node;
@@ -34,5 +35,6 @@ void server_init(char *address);
 void server_exit(void);
 void server_accept(void);
 void server_serve(struct client *client);
+void server_query(FILE *dest);
 
 #endif

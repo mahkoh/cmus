@@ -1110,12 +1110,6 @@ static void set_color(unsigned int id, const char *buf)
 	update_full();
 }
 
-static const char * const attr_enum_names[6 + 1] = {
-	"default",
-	"standout", "underline", "reverse", "blink", "bold",
-	NULL
-};
-
 static void get_attr(unsigned int id, char *buf)
 {
 	int attr = attrs[id];
@@ -1186,28 +1180,17 @@ static void set_attr(unsigned int id, const char *buf)
 static char **id_to_fmt(enum format_id id)
 {
 	switch (id) {
-	case FMT_CURRENT_ALT:
-		return &current_alt_format;
-	case FMT_PLAYLIST_ALT:
-		return &list_win_alt_format;
-	case FMT_TITLE_ALT:
-		return &window_title_alt_format;
-	case FMT_TRACKWIN_ALT:
-		return &track_win_alt_format;
-	case FMT_CURRENT:
-		return &current_format;
-	case FMT_PLAYLIST:
-		return &list_win_format;
-	case FMT_PLAYLIST_VA:
-		return &list_win_format_va;
-	case FMT_TITLE:
-		return &window_title_format;
-	case FMT_TRACKWIN:
-		return &track_win_format;
-	case FMT_TRACKWIN_VA:
-		return &track_win_format_va;
-	default:
-		die("unhandled format code: %d\n", id);
+	case FMT_CURRENT_ALT:  return &current_alt_format;
+	case FMT_PLAYLIST_ALT: return &list_win_alt_format;
+	case FMT_TITLE_ALT:    return &window_title_alt_format;
+	case FMT_TRACKWIN_ALT: return &track_win_alt_format;
+	case FMT_CURRENT:      return &current_format;
+	case FMT_PLAYLIST:     return &list_win_format;
+	case FMT_PLAYLIST_VA:  return &list_win_format_va;
+	case FMT_TITLE:        return &window_title_format;
+	case FMT_TRACKWIN:     return &track_win_format;
+	case FMT_TRACKWIN_VA:  return &track_win_format_va;
+	default: die("unhandled format code: %d\n", id);
 	}
 	return NULL;
 }
