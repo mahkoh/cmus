@@ -917,7 +917,7 @@ static void set_auto_expand_albums_follow_int(int value)
 
 static void set_auto_expand_albums_follow(unsigned int id, const char *buf)
 {
-	int tmp;
+	int tmp = 0;
 	parse_bool(buf, &tmp);
 	set_auto_expand_albums_follow_int(tmp);
 }
@@ -941,7 +941,7 @@ static void set_auto_expand_albums_search_int(int value)
 
 static void set_auto_expand_albums_search(unsigned int id, const char *buf)
 {
-	int tmp;
+	int tmp = 0;
 	parse_bool(buf, &tmp);
 	set_auto_expand_albums_search_int(tmp);
 }
@@ -965,7 +965,7 @@ static void set_auto_expand_albums_selcur_int(int value)
 
 static void set_auto_expand_albums_selcur(unsigned int id, const char *buf)
 {
-	int tmp;
+	int tmp = 0;
 	parse_bool(buf, &tmp);
 	set_auto_expand_albums_selcur_int(tmp);
 }
@@ -1000,7 +1000,7 @@ static void set_show_all_tracks_int(int value)
 
 static void set_show_all_tracks(unsigned int id, const char *buf)
 {
-	int tmp;
+	int tmp = 0;
 	parse_bool(buf, &tmp);
 	set_show_all_tracks_int(tmp);
 }
