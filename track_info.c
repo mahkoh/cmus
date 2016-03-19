@@ -19,7 +19,6 @@
 #include "track_info.h"
 #include "comment.h"
 #include "uchar.h"
-#include "u_collate.h"
 #include "misc.h"
 #include "xmalloc.h"
 #include "utils.h"
@@ -35,12 +34,6 @@ static void track_info_free(struct track_info *ti)
 	free(ti->filename);
 	free(ti->codec);
 	free(ti->codec_profile);
-	free(ti->collkey_artist);
-	free(ti->collkey_album);
-	free(ti->collkey_title);
-	free(ti->collkey_genre);
-	free(ti->collkey_comment);
-	free(ti->collkey_albumartist);
 	free(ti);
 }
 
@@ -94,13 +87,6 @@ void track_info_set_comments(struct track_info *ti, struct keyval *comments) {
 	ti->rg_track_peak = comments_get_double(comments, "replaygain_track_peak");
 	ti->rg_album_gain = comments_get_double(comments, "replaygain_album_gain");
 	ti->rg_album_peak = comments_get_double(comments, "replaygain_album_peak");
-
-	ti->collkey_artist = u_strcasecoll_key0(ti->artist);
-	ti->collkey_album = u_strcasecoll_key0(ti->album);
-	ti->collkey_title = u_strcasecoll_key0(ti->title);
-	ti->collkey_genre = u_strcasecoll_key0(ti->genre);
-	ti->collkey_comment = u_strcasecoll_key0(ti->comment);
-	ti->collkey_albumartist = u_strcasecoll_key0(ti->albumartist);
 }
 
 void track_info_ref(struct track_info *ti)
@@ -218,7 +204,7 @@ int track_info_cmp(const struct track_info *a, const struct track_info *b, const
 			break;
 		case SORT_FILENAME:
 			/* NOTE: filenames are not necessarily UTF-8 */
-			res = strcoll(a->filename, b->filename);
+			res = strcmp(a->filename, b->filename);
 			break;
 		case SORT_RG_TRACK_GAIN:
 		case SORT_RG_TRACK_PEAK:

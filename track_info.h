@@ -54,13 +54,6 @@ struct track_info {
 	const char *albumsort;
 	const char *media;
 
-	char *collkey_artist;
-	char *collkey_album;
-	char *collkey_title;
-	char *collkey_genre;
-	char *collkey_comment;
-	char *collkey_albumartist;
-
 	unsigned int play_count;
 
 	int is_va_compilation : 1;
@@ -70,9 +63,9 @@ struct track_info {
 typedef size_t sort_key_t;
 
 #define SORT_INVALID            ((sort_key_t) (-1))
-#define SORT_ARTIST        	offsetof(struct track_info, collkey_artist)
-#define SORT_ALBUM         	offsetof(struct track_info, collkey_album)
-#define SORT_TITLE         	offsetof(struct track_info, collkey_title)
+#define SORT_ARTIST        	offsetof(struct track_info, artist)
+#define SORT_ALBUM         	offsetof(struct track_info, album)
+#define SORT_TITLE         	offsetof(struct track_info, title)
 #define SORT_TRACKNUMBER   	offsetof(struct track_info, tracknumber)
 #define SORT_DISCNUMBER    	offsetof(struct track_info, discnumber)
 #define SORT_DATE          	offsetof(struct track_info, date)
@@ -81,9 +74,9 @@ typedef size_t sort_key_t;
 #define SORT_RG_TRACK_PEAK 	offsetof(struct track_info, rg_track_peak)
 #define SORT_RG_ALBUM_GAIN 	offsetof(struct track_info, rg_album_gain)
 #define SORT_RG_ALBUM_PEAK 	offsetof(struct track_info, rg_album_peak)
-#define SORT_GENRE         	offsetof(struct track_info, collkey_genre)
-#define SORT_COMMENT       	offsetof(struct track_info, collkey_comment)
-#define SORT_ALBUMARTIST   	offsetof(struct track_info, collkey_albumartist)
+#define SORT_GENRE         	offsetof(struct track_info, genre)
+#define SORT_COMMENT       	offsetof(struct track_info, comment)
+#define SORT_ALBUMARTIST   	offsetof(struct track_info, albumartist)
 #define SORT_PLAY_COUNT   	offsetof(struct track_info, play_count)
 #define SORT_FILENAME      	offsetof(struct track_info, filename)
 #define SORT_FILEMTIME     	offsetof(struct track_info, mtime)
@@ -93,9 +86,9 @@ typedef size_t sort_key_t;
 #define SORT_MEDIA		offsetof(struct track_info, media)
 #define SORT_BPM		offsetof(struct track_info, bpm)
 #define REV_SORT__START		sizeof(struct track_info)
-#define REV_SORT_ARTIST		(REV_SORT__START + offsetof(struct track_info, collkey_artist))
-#define REV_SORT_ALBUM          (REV_SORT__START + offsetof(struct track_info, collkey_album))
-#define REV_SORT_TITLE          (REV_SORT__START + offsetof(struct track_info, collkey_title))
+#define REV_SORT_ARTIST		(REV_SORT__START + offsetof(struct track_info, artist))
+#define REV_SORT_ALBUM          (REV_SORT__START + offsetof(struct track_info, album))
+#define REV_SORT_TITLE          (REV_SORT__START + offsetof(struct track_info, title))
 #define REV_SORT_PLAY_COUNT   	(REV_SORT__START + offsetof(struct track_info, play_count))
 #define REV_SORT_TRACKNUMBER    (REV_SORT__START + offsetof(struct track_info, tracknumber))
 #define REV_SORT_DISCNUMBER     (REV_SORT__START + offsetof(struct track_info, discnumber))
@@ -105,9 +98,9 @@ typedef size_t sort_key_t;
 #define REV_SORT_RG_TRACK_PEAK  (REV_SORT__START + offsetof(struct track_info, rg_track_peak))
 #define REV_SORT_RG_ALBUM_GAIN  (REV_SORT__START + offsetof(struct track_info, rg_album_gain))
 #define REV_SORT_RG_ALBUM_PEAK  (REV_SORT__START + offsetof(struct track_info, rg_album_peak))
-#define REV_SORT_GENRE          (REV_SORT__START + offsetof(struct track_info, collkey_genre))
-#define REV_SORT_COMMENT        (REV_SORT__START + offsetof(struct track_info, collkey_comment))
-#define REV_SORT_ALBUMARTIST    (REV_SORT__START + offsetof(struct track_info, collkey_albumartist))
+#define REV_SORT_GENRE          (REV_SORT__START + offsetof(struct track_info, genre))
+#define REV_SORT_COMMENT        (REV_SORT__START + offsetof(struct track_info, comment))
+#define REV_SORT_ALBUMARTIST    (REV_SORT__START + offsetof(struct track_info, albumartist))
 #define REV_SORT_FILENAME       (REV_SORT__START + offsetof(struct track_info, filename))
 #define REV_SORT_FILEMTIME      (REV_SORT__START + offsetof(struct track_info, mtime))
 #define REV_SORT_BITRATE        (REV_SORT__START + offsetof(struct track_info, bitrate))

@@ -23,7 +23,6 @@
 #include "debug.h"
 #include "mergesort.h"
 #include "options.h"
-#include "u_collate.h"
 #include "rbtree.h"
 
 #include <ctype.h>
@@ -516,9 +515,6 @@ static struct artist *artist_new(const char *name, const char *sort_name, int is
 	a->name = xstrdup(name);
 	a->sort_name = sort_name ? xstrdup(sort_name) : NULL;
 	a->auto_sort_name = auto_artist_sort_name(name);
-	a->collkey_name = u_strcasecoll_key(a->name);
-	a->collkey_sort_name = u_strcasecoll_key0(a->sort_name);
-	a->collkey_auto_sort_name = u_strcasecoll_key0(a->auto_sort_name);
 	a->expanded = 0;
 	a->is_compilation = is_compilation;
 	rb_root_init(&a->album_root);
@@ -536,9 +532,6 @@ static void artist_free(struct artist *artist)
 	free(artist->name);
 	free(artist->sort_name);
 	free(artist->auto_sort_name);
-	free(artist->collkey_name);
-	free(artist->collkey_sort_name);
-	free(artist->collkey_auto_sort_name);
 	free(artist);
 }
 
@@ -549,8 +542,6 @@ static struct album *album_new(struct artist *artist, const char *name,
 
 	album->name = xstrdup(name);
 	album->sort_name = sort_name ? xstrdup(sort_name) : NULL;
-	album->collkey_name = u_strcasecoll_key(name);
-	album->collkey_sort_name = u_strcasecoll_key0(sort_name);
 	album->date = date;
 	album->min_date = date;
 	rb_root_init(&album->track_root);
@@ -563,8 +554,6 @@ static void album_free(struct album *album)
 {
 	free(album->name);
 	free(album->sort_name);
-	free(album->collkey_name);
-	free(album->collkey_sort_name);
 	free(album);
 }
 
@@ -637,28 +626,28 @@ struct track_info *tree_activate_selected(void)
 	return info;
 }
 
-static int special_name_cmp(const char *a, const char *collkey_a,
-		               const char *b, const char *collkey_b)
+static int special_name_cmp(const char *a, const char *key_a,
+		               const char *b, const char *key_b)
 {
 	/* keep <Stream> etc. top */
 	int cmp = (*a != '<') - (*b != '<');
 
 	if (cmp)
 		return cmp;
-	return strcmp(collkey_a, collkey_b);
+	return strcmp(key_a, key_b);
 }
 
-static inline const char *album_sort_collkey(const struct album *a)
+static inline const char *album_sort_key(const struct album *a)
 {
         if (a->sort_name)
-                return a->collkey_sort_name;
+                return a->sort_name;
 
-        return a->collkey_name;
+        return a->name;
 }
 
 static int special_album_cmp(const struct album *a, const struct album *b)
 {
-	return special_name_cmp(a->name, album_sort_collkey(a), b->name, album_sort_collkey(b));
+	return special_name_cmp(a->name, album_sort_key(a), b->name, album_sort_key(b));
 }
 
 static int special_album_cmp_date(const struct album *a, const struct album *b)
@@ -672,19 +661,19 @@ static int special_album_cmp_date(const struct album *a, const struct album *b)
 	if (cmp)
 		return cmp;
 
-	return strcmp(album_sort_collkey(a), album_sort_collkey(b));
+	return strcmp(album_sort_key(a), album_sort_key(b));
 }
 
 /* has to follow the same logic as artist_sort_name() */
-static inline const char *artist_sort_collkey(const struct artist *a)
+static inline const char *artist_sort_key(const struct artist *a)
 {
         if (a->sort_name)
-                return a->collkey_sort_name;
+                return a->sort_name;
 
         if (smart_artist_sort && a->auto_sort_name)
-                return a->collkey_auto_sort_name;
+                return a->auto_sort_name;
 
-        return a->collkey_name;
+        return a->name;
 }
 
 static struct artist *do_find_artist(const struct artist *artist,
@@ -694,13 +683,13 @@ static struct artist *do_find_artist(const struct artist *artist,
 {
 	struct rb_node **new = &(root->rb_node), *parent = NULL;
 	const char *a = artist_sort_name(artist);
-	const char *collkey_a = artist_sort_collkey(artist);
+	const char *key_a = artist_sort_key(artist);
 
 	while (*new) {
 		struct artist *cur_artist = to_artist(*new);
 		const char *b = artist_sort_name(cur_artist);
-		const char *collkey_b = artist_sort_collkey(cur_artist);
-		int result = special_name_cmp(a, collkey_a, b, collkey_b);
+		const char *key_b = artist_sort_key(cur_artist);
+		int result = special_name_cmp(a, key_a, b, key_b);
 
 		parent = *new;
 		if (result < 0)
@@ -961,7 +950,6 @@ void tree_add_track(struct tree_track *track)
 		/* If it makes sense to update sort_name, do it */
 		if (!artist->sort_name && artistsort_name) {
 			artist->sort_name = xstrdup(artistsort_name);
-			artist->collkey_sort_name = u_strcasecoll_key(artistsort_name);
 			changed = 1;
 		}
 		/* If names differ, update */
@@ -969,11 +957,8 @@ void tree_add_track(struct tree_track *track)
 			char *auto_sort_name = auto_artist_sort_name(artist_name);
 			if (auto_sort_name) {
 				free(artist->name);
-				free(artist->collkey_name);
 				artist->name = xstrdup(artist_name);
-				artist->collkey_name = u_strcasecoll_key(artist_name);
 				artist->auto_sort_name = auto_sort_name;
-				artist->collkey_auto_sort_name = u_strcasecoll_key(auto_sort_name);
 				changed = 1;
 			}
 		}

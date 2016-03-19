@@ -161,7 +161,7 @@ static void tabexp_load_env_path(const char *env_path, const char *start,
 	} while (n);
 
 	if (array.count) {
-		ptr_array_sort(&array, strptrcoll);
+		ptr_array_sort(&array, strptrcmp);
 		ptr_array_unique(&array, strptrcmp);
 
 		tabexp.head = xstrdup("");
