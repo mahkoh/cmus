@@ -82,7 +82,6 @@ struct input_plugin {
 };
 
 struct ip {
-	struct list_head node;
 	char *name;
 	void *handle;
 
@@ -94,7 +93,9 @@ struct ip {
 };
 
 static const char * const plugin_dir = LIBDIR "/cmus/ip";
-static LIST_HEAD(ip_head);
+static struct ip **ips;
+static struct ip **sorted_ips;
+static size_t num_ips;
 
 /* timeouts (ms) */
 static int http_connection_timeout = 5e3;
@@ -106,18 +107,15 @@ static const char *pl_mime_types[] = {
 	"audio/x-mpegurl"
 };
 
-static const struct input_plugin_ops *get_ops_by_extension(const char *ext, struct list_head **headp)
+static const struct input_plugin_ops *get_ops_by_extension(const char *ext, size_t *start)
 {
-	struct list_head *node = *headp;
-
-	for (node = node->next; node != &ip_head; node = node->next) {
-		struct ip *ip = list_entry(node, struct ip, node);
+	for (size_t pos = *start; pos < num_ips; pos++) {
+		struct ip *ip = sorted_ips[pos];
 		const char * const *exts = ip->extensions;
-		int i;
 
-		for (i = 0; exts[i]; i++) {
+		for (int i = 0; exts[i]; i++) {
 			if (strcasecmp(ext, exts[i]) == 0 || strcmp("*", exts[i]) == 0) {
-				*headp = node;
+				*start = pos + 1;
 				return ip->ops;
 			}
 		}
@@ -127,13 +125,11 @@ static const struct input_plugin_ops *get_ops_by_extension(const char *ext, stru
 
 static const struct input_plugin_ops *get_ops_by_mime_type(const char *mime_type)
 {
-	struct ip *ip;
-
-	list_for_each_entry(ip, &ip_head, node) {
+	for (size_t pos = 0; pos < num_ips; pos++) {
+		struct ip *ip = sorted_ips[pos];
 		const char * const *types = ip->mime_types;
-		int i;
 
-		for (i = 0; types[i]; i++) {
+		for (int i = 0; types[i]; i++) {
 			if (strcasecmp(mime_type, types[i]) == 0)
 				return ip->ops;
 		}
@@ -405,7 +401,7 @@ static void ip_reset(struct input_plugin *ip, int close_fd)
 static int open_file(struct input_plugin *ip)
 {
 	const struct input_plugin_ops *ops;
-	struct list_head *head = &ip_head;
+	size_t ip_pos = 0;
 	const char *ext;
 	int rc = 0;
 
@@ -413,7 +409,7 @@ static int open_file(struct input_plugin *ip)
 	if (!ext)
 		return -IP_ERROR_UNRECOGNIZED_FILE_TYPE;
 
-	ops = get_ops_by_extension(ext, &head);
+	ops = get_ops_by_extension(ext, &ip_pos);
 	if (!ops)
 		return -IP_ERROR_UNRECOGNIZED_FILE_TYPE;
 
@@ -427,7 +423,7 @@ static int open_file(struct input_plugin *ip)
 		if (rc != -IP_ERROR_UNSUPPORTED_FILE_TYPE)
 			break;
 
-		ops = get_ops_by_extension(ext, &head);
+		ops = get_ops_by_extension(ext, &ip_pos);
 		if (!ops)
 			break;
 
@@ -438,11 +434,17 @@ static int open_file(struct input_plugin *ip)
 	return rc;
 }
 
-static int sort_ip(const struct list_head *a_, const struct list_head *b_)
+static int sort_ip(const void *a_, const void *b_)
 {
-	const struct ip *a = list_entry(a_, struct ip, node);
-	const struct ip *b = list_entry(b_, struct ip, node);
-	return b->priority - a->priority;
+	const struct ip * const *a = a_;
+	const struct ip * const *b = b_;
+
+	return (*b)->priority - (*a)->priority;
+}
+
+static void ip_sort_plugins(void)
+{
+	qsort(sorted_ips, num_ips, sizeof(struct ip *), sort_ip);
 }
 
 void ip_load_plugins(void)
@@ -496,9 +498,13 @@ void ip_load_plugins(void)
 		ip->name = xstrndup(d->d_name, ext - d->d_name);
 		ip->handle = so;
 
-		list_add_tail(&ip->node, &ip_head);
+		num_ips += 1;
+		ips = xrenew(struct ip *, ips, num_ips);
+		ips[num_ips - 1] = ip;
 	}
-	list_mergesort(&ip_head, sort_ip);
+	sorted_ips = xnew(struct ip *, num_ips);
+	memcpy(sorted_ips, ips, num_ips * sizeof(*ips));
+	ip_sort_plugins();
 	closedir(dir);
 }
 
@@ -787,18 +793,6 @@ int ip_eof(struct input_plugin *ip)
 	return ip->eof;
 }
 
-static struct ip *find_plugin(int idx)
-{
-	struct ip *ip;
-
-	list_for_each_entry(ip, &ip_head, node) {
-		if (idx == 0)
-			return ip;
-		idx--;
-	}
-	return NULL;
-}
-
 static void option_error(int rc)
 {
 	char *msg = ip_get_error_msg(NULL, rc, "setting option");
@@ -808,7 +802,7 @@ static void option_error(int rc)
 
 static void set_ip_option(unsigned int id, const char *val)
 {
-	const struct ip *ip = find_plugin(id >> 16);
+	const struct ip *ip = ips[id >> 16];
 	int rc;
 
 	rc = ip->ops->set_option(id & 0xffff, val);
@@ -818,7 +812,7 @@ static void set_ip_option(unsigned int id, const char *val)
 
 static void get_ip_option(unsigned int id, char *buf)
 {
-	const struct ip *ip = find_plugin(id >> 16);
+	const struct ip *ip = ips[id >> 16];
 	char *val = NULL;
 
 	ip->ops->get_option(id & 0xffff, &val);
@@ -828,20 +822,38 @@ static void get_ip_option(unsigned int id, char *buf)
 	}
 }
 
+static void set_ip_priority(unsigned int id, const char *val)
+{
+	long int tmp;
+
+	if (str_to_int(val, &tmp) == -1) {
+		error_msg("integer expected");
+	} else {
+		ips[id]->priority = (int)tmp;
+		ip_sort_plugins();
+	}
+}
+
+static void get_ip_priority(unsigned int id, char *val)
+{
+	snprintf(val, OPTION_MAX_SIZE, "%d", ips[id]->priority);
+}
+
 void ip_add_options(void)
 {
-	struct ip *ip;
 	unsigned int iid, pid = 0;
 	char key[64];
 
-	list_for_each_entry(ip, &ip_head, node) {
+	for (pid = 0; pid < num_ips; pid++) {
+		const struct ip *ip = ips[pid];
+
+		snprintf(key, sizeof(key), "input.%s.priority", ip->name);
+		option_add(xstrdup(key), pid, get_ip_priority, set_ip_priority, NULL, 0);
+
 		for (iid = 0; ip->options[iid]; iid++) {
-			snprintf(key, sizeof(key), "input.%s.%s",
-					ip->name,
-					ip->options[iid]);
+			snprintf(key, sizeof(key), "input.%s.%s", ip->name, ip->options[iid]);
 			option_add(xstrdup(key), (pid << 16) | iid, get_ip_option, set_ip_option, NULL, 0);
 		}
-		pid++;
 	}
 }
 
@@ -915,14 +927,14 @@ char *ip_get_error_msg(struct input_plugin *ip, int rc, const char *arg)
 
 char **ip_get_supported_extensions(void)
 {
-	struct ip *ip;
 	char **exts;
-	int i, size;
+	int i, size, pid;
 	int count = 0;
 
 	size = 8;
 	exts = xnew(char *, size);
-	list_for_each_entry(ip, &ip_head, node) {
+	for (pid = 0; pid < num_ips; pid++) {
+		const struct ip *ip = ips[pid];
 		const char * const *e = ip->extensions;
 
 		for (i = 0; e[i]; i++) {
@@ -940,16 +952,15 @@ char **ip_get_supported_extensions(void)
 
 void ip_dump_plugins(void)
 {
-	struct ip *ip;
-	int i;
-
 	printf("Input Plugins: %s\n", plugin_dir);
-	list_for_each_entry(ip, &ip_head, node) {
-		printf("  %s:\n    Priority: %d\n    File Types:", ip->name, ip->priority);
-		for (i = 0; ip->extensions[i]; i++)
+	for (size_t pid = 0; pid < num_ips; pid++) {
+		const struct ip *ip = sorted_ips[pid];
+
+		printf("  %s:\n    Default priority: %d\n    File Types:", ip->name, ip->priority);
+		for (int i = 0; ip->extensions[i]; i++)
 			printf(" %s", ip->extensions[i]);
 		printf("\n    MIME Types:");
-		for (i = 0; ip->mime_types[i]; i++)
+		for (int i = 0; ip->mime_types[i]; i++)
 			printf(" %s", ip->mime_types[i]);
 		printf("\n");
 	}
