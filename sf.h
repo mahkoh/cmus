@@ -19,6 +19,8 @@
 #ifndef CMUS_SF_H
 #define CMUS_SF_H
 
+#include "config/endian.h"
+
 /*
  *  0     1 big_endian 0-1
  *  1     1 is_signed  0-1

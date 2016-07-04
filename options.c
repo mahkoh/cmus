@@ -35,9 +35,7 @@
 #include "prog.h"
 #include "output.h"
 #include "input.h"
-#ifdef HAVE_CONFIG
 #include "config/datadir.h"
-#endif
 #include "track_info.h"
 #include "cache.h"
 #include "debug.h"

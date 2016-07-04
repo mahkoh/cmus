@@ -27,11 +27,9 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#if HAVE_CONFIG
 #include "config/samplerate.h"
 #ifdef HAVE_SAMPLERATE
 #include <samplerate.h>
-#endif
 #endif
 
 #include "op.h"

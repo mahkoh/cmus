@@ -49,10 +49,8 @@
 #include "path.h"
 #include "mixer.h"
 #include "mpris.h"
-#ifdef HAVE_CONFIG
 #include "config/curses.h"
 #include "config/iconv.h"
-#endif
 
 #include <unistd.h>
 #include <fcntl.h>

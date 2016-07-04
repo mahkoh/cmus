@@ -18,6 +18,7 @@
 
 #include "pcm.h"
 #include "utils.h"
+#include "config/endian.h"
 
 #include <stdint.h>
 #include <stdlib.h>

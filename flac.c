@@ -21,6 +21,7 @@
 #include "xmalloc.h"
 #include "debug.h"
 #include "utils.h"
+#include "config/endian.h"
 
 #include <FLAC/export.h>
 

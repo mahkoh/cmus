@@ -32,9 +32,7 @@
 #include "misc.h"
 #include "debug.h"
 #include "ui_curses.h"
-#ifdef HAVE_CONFIG
 #include "config/libdir.h"
-#endif
 
 #include <unistd.h>
 #include <string.h>

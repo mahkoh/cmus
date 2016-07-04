@@ -21,6 +21,7 @@
 #include "path.h"
 #include "utils.h"
 #include "debug.h"
+#include "config/discid.h"
 
 #include <stdio.h>
 #include <string.h>

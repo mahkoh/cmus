@@ -44,9 +44,7 @@
 
 #undef HAVE_CDDB
 
-#ifdef HAVE_CONFIG
 #include "config/cdio.h"
-#endif
 
 #ifdef HAVE_CDDB
 #include "http.h"

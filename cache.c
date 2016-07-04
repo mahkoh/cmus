@@ -26,6 +26,7 @@
 #include "xstrjoin.h"
 #include "gbuf.h"
 #include "options.h"
+#include "config/endian.h"
 
 #include <stdlib.h>
 #include <stdio.h>

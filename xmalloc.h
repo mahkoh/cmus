@@ -20,9 +20,7 @@
 #define CMUS_XMALLOC_H
 
 #include "compiler.h"
-#ifdef HAVE_CONFIG
 #include "config/xmalloc.h"
-#endif
 
 #include <stdlib.h>
 #include <string.h>

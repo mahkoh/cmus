@@ -44,9 +44,7 @@
 #include "list.h"
 #include "debug.h"
 #include "load_dir.h"
-#ifdef HAVE_CONFIG
 #include "config/datadir.h"
-#endif
 #include "help.h"
 #include "op.h"
 #include "mpris.h"

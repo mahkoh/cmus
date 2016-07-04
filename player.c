@@ -28,6 +28,8 @@
 #include "compiler.h"
 #include "options.h"
 #include "mpris.h"
+#include "config/endian.h"
+#include "config/scheduling.h"
 
 #include <stdio.h>
 #include <stdlib.h>

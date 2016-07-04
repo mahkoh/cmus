@@ -19,10 +19,7 @@
 #ifndef CMUS_UTILS_H
 #define CMUS_UTILS_H
 
-#ifdef HAVE_CONFIG
 #include "config/utils.h"
-#endif
-
 #include "compiler.h"
 
 #include <stdlib.h>

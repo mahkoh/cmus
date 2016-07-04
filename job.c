@@ -34,9 +34,7 @@
 #include "discid.h"
 #include "xstrjoin.h"
 #include "ui_curses.h"
-#ifdef HAVE_CONFIG
 #include "config/cue.h"
-#endif
 #ifdef CONFIG_CUE
 #include "cue_utils.h"
 #endif

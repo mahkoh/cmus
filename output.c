@@ -26,9 +26,7 @@
 #include "debug.h"
 #include "ui_curses.h"
 #include "options.h"
-#ifdef HAVE_CONFIG
 #include "config/libdir.h"
-#endif
 
 #include <string.h>
 #include <strings.h>
