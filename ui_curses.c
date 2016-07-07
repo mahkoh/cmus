@@ -2161,6 +2161,7 @@ static void main_loop(void)
 		SELECT_ADD_FD(0);
 		SELECT_ADD_FD(notify_out);
 		SELECT_ADD_FD(job_fd);
+		SELECT_ADD_FD(cmus_next_track_request_fd);
 		SELECT_ADD_FD(server_socket);
 		if (mpris_fd != -1)
 			SELECT_ADD_FD(mpris_fd);
@@ -2244,6 +2245,9 @@ static void main_loop(void)
 				d_print("read failed: %s\n", strerror(errno));
 			}
 		}
+
+		if (FD_ISSET(cmus_next_track_request_fd, &set))
+			cmus_provide_next_track();
 	}
 }
 
@@ -2357,6 +2361,7 @@ static void notify_init(void)
 static void init_all(void)
 {
 	main_thread = pthread_self();
+	cmus_track_request_init();
 
 	server_init(server_address);
 
